@@ -1,3 +1,10 @@
+/**
+ * Group 9 HW 08
+ * AuthActivity.java
+ * Phi Ha
+ * Srinath Dittakavi
+ */
+
 package edu.uncc.hw08;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,6 +19,13 @@ public class AuthActivity extends AppCompatActivity implements LoginFragment.Log
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        /**
+         * For test purposes
+         * email: j@j.com
+         * password: 123456
+         * Name: John Smith
+         */
 
         if(mAuth.getCurrentUser() == null){
             setContentView(R.layout.activity_auth);
