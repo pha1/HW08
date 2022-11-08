@@ -7,6 +7,7 @@
 
 package edu.uncc.hw08;
 
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -79,7 +80,45 @@ public class ChatFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // TODO Replace PERSON'S NAME with other user's name
+        getActivity().setTitle(R.string.chat_label + " " + "PERSON'S NAME");
 
+        // Delete Chat Button
+        binding.buttonDeleteChat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // TODO Delete from database
+            }
+        });
 
+        // Submit Button
+        binding.buttonSubmit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // TODO Implement Submit to database
+            }
+        });
+
+        // Close Button
+        binding.buttonClose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mListener.goToMyChats();
+            }
+        });
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (context instanceof ChatFragmentListener) {
+            mListener = (ChatFragmentListener) context;
+        }
+    }
+
+    ChatFragmentListener mListener;
+
+    public interface ChatFragmentListener {
+        void goToMyChats();
     }
 }
