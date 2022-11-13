@@ -12,4 +12,6 @@
     <string name="create_account_label">Create New Account</string>
     <string name="chat_label">Chat - </string>
     <string name="me">Me</string>
+    <string name="delete_message">Are you sure you want to delete the message?</string>
+    <string name="delete">Delete</string>
 </resources>

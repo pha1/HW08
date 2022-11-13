@@ -31,12 +31,13 @@ public class MainActivity extends AppCompatActivity implements MyChatsFragment.M
      */
     @Override
     public void logout() {
+        // Sign out
+        FirebaseAuth.getInstance().signOut();
+
         // Go to AuthActivity
         Intent intent = new Intent(this, AuthActivity.class);
         startActivity(intent);
         finish();
-
-        FirebaseAuth.getInstance().signOut();
     }
 
     /**
@@ -50,7 +51,10 @@ public class MainActivity extends AppCompatActivity implements MyChatsFragment.M
                 .commit();
     }
 
-    // Go to the Chat Fragment with the selected Chat Id
+    /**
+     * Go to Chat Fragment to display Chat details
+     * @param chat The selected Chat Object
+     */
     @Override
     public void chat(Chat chat) {
         getSupportFragmentManager().beginTransaction()

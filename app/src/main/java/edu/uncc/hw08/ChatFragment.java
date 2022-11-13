@@ -7,7 +7,9 @@
 
 package edu.uncc.hw08;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -287,7 +289,22 @@ public class ChatFragment extends Fragment {
                 mBinding.imageViewDelete.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        deleteMessage(mMessage.message_id);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                        builder.setMessage(R.string.delete_message)
+                                .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                deleteMessage(mMessage.message_id);
+                                            }
+                                        })
+                                .setNegativeButton(R.string.cancel_label, new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                // Cancel dialog
+                                            }
+                                        });
+                        builder.create();
+                        builder.show();
                     }
                 });
             }
@@ -317,21 +334,27 @@ public class ChatFragment extends Fragment {
 
                 mMessages.remove(mMessage);
 
-                db.collection("chats").document(chat.chat_id)
-                        .update("lastMessageCreatedAt", mMessages.get(mMessages.size()-1).created_At,
-                                "lastMessageSent", mMessages.get(mMessages.size()-1).message_text)
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void unused) {
-                                Log.d(TAG, "onSuccess: Chat updated after deleting");
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                            }
-                        });
+                if (mMessages.size() > 0)
+                {
+                    db.collection("chats").document(chat.chat_id)
+                            .update("lastMessageCreatedAt", mMessages.get(mMessages.size()-1).created_At,
+                                    "lastMessageSent", mMessages.get(mMessages.size()-1).message_text)
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+                                    Log.d(TAG, "onSuccess: Chat updated after deleting");
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                } else {
+                    db.collection("chats").document(chat.chat_id).delete();
+                    mListener.goToMyChats();
+                }
             }
         }
     }

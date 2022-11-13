@@ -61,6 +61,7 @@ public class LoginFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // Login Button
         binding.buttonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -78,12 +79,14 @@ public class LoginFragment extends Fragment {
                             mListener.gotoMyChat();
                         } else {
                             Toast.makeText(getActivity(), "Login Failed", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     });
                 }
             }
         });
 
+        // Create Account Button
         binding.buttonCreateNewAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

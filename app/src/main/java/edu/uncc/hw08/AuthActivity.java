@@ -39,6 +39,9 @@ public class AuthActivity extends AppCompatActivity implements LoginFragment.Log
         }
     }
 
+    /**
+     * Start Main Activity
+     */
     @Override
     public void gotoMyChat() {
         Intent intent = new Intent(this, MainActivity.class);
