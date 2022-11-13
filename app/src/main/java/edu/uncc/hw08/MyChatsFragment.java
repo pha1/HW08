@@ -18,66 +18,39 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 
 import edu.uncc.hw08.databinding.FragmentMyChatsBinding;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link MyChatsFragment#newInstance} factory method to
- * create an instance of this fragment.
  */
 public class MyChatsFragment extends Fragment {
 
     FragmentMyChatsBinding binding;
     final String TAG = "test";
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
     public MyChatsFragment() {
         // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment MyChatsFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static MyChatsFragment newInstance(String param1, String param2) {
-        MyChatsFragment fragment = new MyChatsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
@@ -94,9 +67,17 @@ public class MyChatsFragment extends Fragment {
 
         getActivity().setTitle(R.string.chats_label);
 
-        // TODO Create a List (Provided ListView)
-        // TODO Adapter
-        // TODO Click list item go to Chat Fragment
+        getChats();
+
+        adapter = new ChatAdapter(getActivity(), R.layout.my_chats_list_item, mChats);
+        binding.listView.setAdapter(adapter);
+
+        binding.listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                mListener.chat(mChats.get(i));
+            }
+        });
 
         // New Chat
         binding.buttonNewChat.setOnClickListener(new View.OnClickListener() {
@@ -116,8 +97,37 @@ public class MyChatsFragment extends Fragment {
         });
     }
 
-
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    String currentUid = mAuth.getCurrentUser().getUid();
+
+    private void getChats() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("chats")
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                @Override
+                public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                    mChats.clear();
+                    for(QueryDocumentSnapshot document : value) {
+                        if(document.getString("user1").equals(currentUid)
+                         || document.getString("user2").equals(currentUid)) {
+                            Chat chat = document.toObject(Chat.class);
+                            mChats.add(chat);
+                        }
+                    }
+                    Collections.sort(mChats, new Comparator<Chat>() {
+                        @Override
+                        public int compare(Chat chat, Chat t1) {
+                            return -1 * chat.lastMessageCreatedAt.compareTo(t1.lastMessageCreatedAt);
+                        }
+                    });
+                    adapter.notifyDataSetChanged();
+                }
+            });
+    }
+
+    ArrayList<Chat> mChats = new ArrayList<>();
+    ChatAdapter adapter;
 
     /**
      * This changes the logged_in value of the user to false
@@ -163,5 +173,6 @@ public class MyChatsFragment extends Fragment {
     public interface MyChatsFragmentListener {
         void logout();
         void newChat();
+        void chat(Chat chat);
     }
 }

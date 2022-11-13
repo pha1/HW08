@@ -14,7 +14,7 @@ import android.os.Bundle;
 
 import com.google.firebase.auth.FirebaseAuth;
 
-public class MainActivity extends AppCompatActivity implements MyChatsFragment.MyChatsFragmentListener, CreateChatFragment.CreateChatFragmentListener {
+public class MainActivity extends AppCompatActivity implements MyChatsFragment.MyChatsFragmentListener, CreateChatFragment.CreateChatFragmentListener, ChatFragment.ChatFragmentListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,12 +31,12 @@ public class MainActivity extends AppCompatActivity implements MyChatsFragment.M
      */
     @Override
     public void logout() {
-        FirebaseAuth.getInstance().signOut();
-
         // Go to AuthActivity
         Intent intent = new Intent(this, AuthActivity.class);
         startActivity(intent);
         finish();
+
+        FirebaseAuth.getInstance().signOut();
     }
 
     /**
@@ -46,6 +46,15 @@ public class MainActivity extends AppCompatActivity implements MyChatsFragment.M
     public void newChat() {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.rootView, new CreateChatFragment(), "New Chat")
+                .addToBackStack(null)
+                .commit();
+    }
+
+    // Go to the Chat Fragment with the selected Chat Id
+    @Override
+    public void chat(Chat chat) {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.rootView, ChatFragment.newInstance(chat), "Chat")
                 .addToBackStack(null)
                 .commit();
     }
