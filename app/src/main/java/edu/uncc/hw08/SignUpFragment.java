@@ -26,10 +26,16 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
 
 import edu.uncc.hw08.databinding.FragmentSignUpBinding;
 
 public class SignUpFragment extends Fragment {
+
+    final String TAG = "test";
+
     public SignUpFragment() {
         // Required empty public constructor
     }
@@ -90,6 +96,7 @@ public class SignUpFragment extends Fragment {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if (task.isSuccessful()) {
+                                            addToUserCollection();
                                             mListener.gotoMyChat();
                                         } else {
                                             Toast.makeText(getContext(), "Error in creating user", Toast.LENGTH_SHORT).show();
@@ -108,6 +115,28 @@ public class SignUpFragment extends Fragment {
 
         getActivity().setTitle("Sign Up");
 
+    }
+
+    /**
+     * Add the new user to the collections of user, with default logged_in value.
+     */
+    private void addToUserCollection() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // Create the map for the user
+        HashMap<String, Object> user = new HashMap<>();
+        user.put("logged_in", true);
+        user.put("name", mAuth.getCurrentUser().getDisplayName());
+        user.put("user_id", mAuth.getCurrentUser().getUid());
+
+        // Get the id of the new document to update it later
+        String doc_id = db.collection("users").document().getId();
+        Log.d(TAG, "addToUserCollection: " + doc_id);
+
+
+        // Update the created document with the user info
+        db.collection("users").document(doc_id)
+                .set(user);
     }
 
     SignUpListener mListener;

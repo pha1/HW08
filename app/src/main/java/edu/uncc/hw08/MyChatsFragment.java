@@ -14,11 +14,19 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.HashMap;
 
 import edu.uncc.hw08.databinding.FragmentMyChatsBinding;
 
@@ -31,7 +39,6 @@ public class MyChatsFragment extends Fragment {
 
     FragmentMyChatsBinding binding;
     final String TAG = "test";
-    private FirebaseAuth mAuth;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -103,9 +110,44 @@ public class MyChatsFragment extends Fragment {
         binding.buttonLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                changeLoggedIn(mAuth.getCurrentUser().getUid());
                 mListener.logout();
             }
         });
+    }
+
+
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+
+    /**
+     * This changes the logged_in value of the user to false
+     * @param uid
+     */
+    private void changeLoggedIn(String uid) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("users").get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+
+                        HashMap<String, Object> user = new HashMap<>();
+                        user.put("logged_in", false);
+
+                        for (QueryDocumentSnapshot document: queryDocumentSnapshots) {
+                            if(document.getString("user_id").equals(uid)) {
+                                db.collection("users").document(document.getId())
+                                        .update(user);
+                            }
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "onFailure: " + e.getMessage());
+                    }
+                });
     }
 
     @Override

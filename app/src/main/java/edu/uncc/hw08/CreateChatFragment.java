@@ -14,10 +14,22 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
 
 import edu.uncc.hw08.databinding.FragmentCreateChatBinding;
 
@@ -83,6 +95,19 @@ public class CreateChatFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        getUserList();
+        adapter = new UserAdapter(getActivity(), R.layout.users_row_item, mUsers);
+        binding.listView.setAdapter(adapter);
+
+        // Clicking on a list item will update the Selected User TextView
+        binding.listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                User user = mUsers.get(i);
+                binding.textViewSelectedUser.setText(user.name);
+            }
+        });
+
         getActivity().setTitle(R.string.create_chat);
 
         // Cancel Button
@@ -97,11 +122,13 @@ public class CreateChatFragment extends Fragment {
         binding.buttonSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO Implement starting a message with a user
                 String chat = binding.editTextMessage.getText().toString();
+                String selected_user = binding.textViewSelectedUser.toString();
 
                 if (chat.isEmpty()){
                     Toast.makeText(getContext(), "Please enter a chat!", Toast.LENGTH_SHORT).show();
+                } else if (selected_user.equals("No User Selected !!")) {
+                    Toast.makeText(getContext(), "Please select a user!", Toast.LENGTH_SHORT).show();
                 } else {
                     // TODO add Chat to database
 
@@ -110,6 +137,37 @@ public class CreateChatFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+
+    ArrayList<User> mUsers = new ArrayList<>();
+    UserAdapter adapter;
+
+    private void getUserList() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("users").get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        mUsers.clear();
+                        for(QueryDocumentSnapshot document: queryDocumentSnapshots) {
+                            if (document.getString("user_id").equals(mAuth.getCurrentUser().getUid())) {
+                                continue;
+                            }
+                            User user = document.toObject(User.class);
+                            mUsers.add(user);
+                        }
+                        adapter.notifyDataSetChanged();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "onFailure: " + e.getMessage());
+                    }
+                });
     }
 
     @Override
