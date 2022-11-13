@@ -22,9 +22,18 @@ public class AuthActivity extends AppCompatActivity implements LoginFragment.Log
 
         /**
          * For test purposes
-         * email: j@j.com
-         * password: 123456
+         * Email: j@j.com
+         * Password: 123456
          * Name: John Smith
+         *
+         * Email: a@a.com
+         * Password: 123456
+         * Name: Alice Smith
+         *
+         * Email: b@b.com
+         * Password: 123456
+         * Name: Bob Smith
+         *
          */
 
         if(mAuth.getCurrentUser() == null){
