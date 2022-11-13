@@ -1,3 +1,10 @@
+/**
+ * Group 9 HW 08
+ * User.java
+ * Phi Ha
+ * Srinath Dittakavi
+ */
+
 package edu.uncc.hw08;
 
 public class User {

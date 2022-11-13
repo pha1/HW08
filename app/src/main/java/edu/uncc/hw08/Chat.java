@@ -1,3 +1,10 @@
+/**
+ * Group 9 HW 08
+ * Chat.java
+ * Phi Ha
+ * Srinath Dittakavi
+ */
+
 package edu.uncc.hw08;
 
 import java.io.Serializable;
